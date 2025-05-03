@@ -12,7 +12,6 @@ version = "1.0.0"
 
 kotlin {
     jvm()
-    macosX64()
     macosArm64()
     linuxX64()
 
