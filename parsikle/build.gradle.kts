@@ -35,7 +35,7 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates(group.toString(), "library", version.toString())
+    coordinates(group.toString(), "parsikle", version.toString())
 
     pom {
         name = "Parsikle"
