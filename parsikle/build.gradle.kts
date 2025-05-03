@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "io.github.gmulders"
-version = "1.0.0"
+version = "0.0.1"
 
 kotlin {
     jvm()
