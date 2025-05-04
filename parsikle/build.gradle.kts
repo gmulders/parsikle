@@ -18,7 +18,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation("io.arrow-kt:arrow-core:2.0.1")
+                implementation(libs.arrow.core)
             }
         }
         val commonTest by getting {
