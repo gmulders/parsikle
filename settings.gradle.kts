@@ -14,4 +14,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "parsikle"
-include(":parsikle", ":parsikle-test")
+include(":core", ":parsikle-test")

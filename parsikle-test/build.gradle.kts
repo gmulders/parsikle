@@ -16,7 +16,7 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(project(":parsikle"))
+                implementation(project(":core"))
                 implementation(libs.kotlin.test)
             }
         }
