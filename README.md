@@ -30,6 +30,12 @@ kotlin {
 }
 ```
 
+## 📚 Documentation
+
+For the full Parsikle docs and detailed guides, see our Overview page:
+
+[Parsikle Documentation Overview](docs/index.md)
+
 ## ✨ Example
 Here’s an example:
 ```kotlin
