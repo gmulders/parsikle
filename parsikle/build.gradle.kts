@@ -1,13 +1,11 @@
 import com.vanniktech.maven.publish.SonatypeHost
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.vanniktech.mavenPublish)
 }
 
-group = "io.github.gmulders"
+group = "io.github.gmulders.parsikle"
 version = "0.0.1"
 
 kotlin {
@@ -35,7 +33,7 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates(group.toString(), "parsikle", version.toString())
+    coordinates(group.toString(), "core", version.toString())
 
     pom {
         name = "Parsikle"

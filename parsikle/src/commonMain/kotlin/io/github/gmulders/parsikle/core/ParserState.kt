@@ -1,4 +1,4 @@
-package io.github.gmulders.parsikle
+package io.github.gmulders.parsikle.core
 
 data class ParserState(
     val source: String,

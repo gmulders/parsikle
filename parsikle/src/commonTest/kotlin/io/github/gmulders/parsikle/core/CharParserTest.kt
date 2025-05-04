@@ -1,4 +1,4 @@
-package io.github.gmulders.parsikle
+package io.github.gmulders.parsikle.core
 
 import io.github.gmulders.parsikle.test.assertThat
 import kotlin.test.Test

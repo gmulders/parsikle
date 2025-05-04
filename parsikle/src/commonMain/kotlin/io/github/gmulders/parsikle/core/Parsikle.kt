@@ -1,4 +1,4 @@
-package io.github.gmulders.parsikle
+package io.github.gmulders.parsikle.core
 
 typealias Parsikle<R> = (ParserState) -> Result<Error, R>
 

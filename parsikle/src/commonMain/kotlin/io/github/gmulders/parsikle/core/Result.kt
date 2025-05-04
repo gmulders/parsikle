@@ -1,4 +1,4 @@
-package io.github.gmulders.parsikle
+package io.github.gmulders.parsikle.core
 
 import arrow.core.Either
 import arrow.core.left

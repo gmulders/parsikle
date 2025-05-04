@@ -1,6 +1,6 @@
 package io.github.gmulders.parsikle.test
 
-import io.github.gmulders.parsikle.*
+import io.github.gmulders.parsikle.core.*
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 import kotlin.test.fail

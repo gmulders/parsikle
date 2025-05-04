@@ -1,4 +1,4 @@
-package io.github.gmulders.parsikle
+package io.github.gmulders.parsikle.core
 
 import arrow.core.Tuple4
 import arrow.core.Tuple5

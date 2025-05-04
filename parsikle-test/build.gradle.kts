@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.vanniktech.mavenPublish)
 }
 
-group = "io.github.gmulders"
+group = "io.github.gmulders.parsikle"
 version = "1.0.0"
 
 kotlin {

@@ -1,4 +1,4 @@
-package io.github.gmulders.parsikle
+package io.github.gmulders.parsikle.core
 
 data class TokenMatch<T>(val type: T, val match: MatchResult) {
     val matchValue: String get() = match.value

@@ -1,4 +1,4 @@
-package io.github.gmulders.parsikle
+package io.github.gmulders.parsikle.core
 
 fun parse(failure: String, predicate: (Char) -> Boolean): Parsikle<Char> = { state ->
     if (state.isNotEof() && predicate(state.nextChar())) {
