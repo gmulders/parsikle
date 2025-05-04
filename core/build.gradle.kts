@@ -5,9 +5,6 @@ plugins {
     alias(libs.plugins.vanniktech.mavenPublish)
 }
 
-group = "io.github.gmulders.parsikle"
-version = "0.0.1"
-
 kotlin {
     jvm()
     macosArm64()
