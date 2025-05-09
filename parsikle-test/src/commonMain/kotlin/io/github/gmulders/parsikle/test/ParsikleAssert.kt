@@ -18,7 +18,7 @@ class ParsikleAssert<R>(val parser: Parsikle<R>) {
 class ResultAssert<R>(val parser: Parsikle<R>, val result: Result<Error, R>) {
     fun succeeds(): SuccessResultAssert<Error, R> {
         return when(result) {
-            is Success -> SuccessResultAssert(result)
+            is Success -> SuccessResultAssert(result).withEmptyContext()
             is Failure -> fail("Result should be Success, but parse failed: ${(result as Failure<Error, R>).error.message}")
         }
     }
@@ -31,6 +31,11 @@ class ResultAssert<R>(val parser: Parsikle<R>, val result: Result<Error, R>) {
 }
 
 class SuccessResultAssert<E: Error, R>(val result: Success<E, R>) {
+    fun withEmptyContext(): SuccessResultAssert<E, R> {
+        assertTrue(result.state.context.isEmpty(), "Expected empty context, but was ${result.state.context}")
+        return this
+    }
+
     fun withNoRemainder(): SuccessResultAssert<E, R> =
         withRemainder("")
 
@@ -65,6 +70,11 @@ class FailedResultAssert<E : Error, R>(val result: Failure<E, R>) {
     fun at(line: Int, column: Int): FailedResultAssert<E, R> {
         assertEquals(line, result.state.line, "Expected line '$line', but was '${result.state.line}'")
         assertEquals(column, result.state.column, "Expected column '$column', but was '${result.state.column}'")
+        return this
+    }
+
+    fun withContext(vararg context: Context): FailedResultAssert<E, R> {
+        assertEquals(context.toList(), result.state.context, "Expected context '$context', but was '${result.state.context}'")
         return this
     }
 }

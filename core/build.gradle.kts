@@ -13,7 +13,6 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                implementation(libs.arrow.core)
             }
         }
         val commonTest by getting {
