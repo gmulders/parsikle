@@ -74,6 +74,27 @@ infix fun <T, V> Parsikle<T>.thenIgnore(parser: Parsikle<V>): Parsikle<T> =
         .map { (t, _) -> t }
 
 /**
+ * Parses `open`, then `p`, then `close`, returning only the result of `p`.
+ * Useful for surrounding constructs like parentheses, brackets, quotes, etc.
+ *
+ * Example:
+ * ```kotlin
+ * // Parser for a number surrounded by parentheses: "(123)"
+ * val parenNumber: Parsikle<Int> =
+ *   between(parse('('), number, parse(')'))
+ *
+ * parenNumber(ParserState("(42)"))  // Success(42)
+ * ```
+ *
+ * @param open   parser for the opening delimiter (e.g. '(')
+ * @param p      parser for the inner content
+ * @param close  parser for the closing delimiter (e.g. ')')
+ * @return       a parser yielding only the result of `p`
+ */
+fun <A, B, C> between(open: Parsikle<A>, p: Parsikle<B>, close: Parsikle<C>): Parsikle<B> =
+    open ignoreThen p thenIgnore close
+
+/**
  * Represents a combined parse error when two alternative parsers both fail.
  *
  * Wraps the error from the left-hand parser and the right-hand parser,
@@ -598,6 +619,75 @@ fun <T, S> rightAssociate(p: Parsikle<T>, separator: Parsikle<S>, transform: (T,
         }
 
 /**
+ * Left‐associative chaining of binary operator parsers.
+ *
+ * Parses a first operand, then zero-or-more repetitions of
+ * `(operator → function, nextOperand)`.
+ * Folds the sequence from the left so that
+ * `t1 ∘ t2 ∘ t3` becomes `op1(op2(t1, t2), t3)`.
+ *
+ * Example:
+ * ```kotlin
+ * // Parser for '-' producing subtraction function
+ * val subOp: Parsikle<(Int, Int) -> Int> = parse('-').map { { a, b -> a - b } }
+ * val num: Parsikle<Int> = digit.many1().map { it.joinToString("").toInt() }
+ *
+ * // Left-associative subtraction: (10 - 3) - 2 = 5
+ * val leftSub = num.chainLeft(subOp)
+ * val result = leftSub(ParserState("10-3-2"))
+ * // Success(5)
+ * ```
+ *
+ * @receiver  parser for the operands
+ * @param op  parser that yields a function combining two `A`s
+ * @return    parser performing a left-associative fold of all parsed
+ *            operators and operands
+ */
+fun <A> Parsikle<A>.chainLeft(op: Parsikle<(A, A) -> A>): Parsikle<A> =
+    this.then((op then this).many())
+        .map { (first, rest) ->
+            rest.fold(first) { acc, (fn, next) -> fn(acc, next) }
+        }
+
+/**
+ * Right-associative chaining of binary operator parsers.
+ *
+ * Parses a head value, then zero-or-more repetitions of
+ * `(operator → function, nextValue)`.
+ * Folds the list from the right so that
+ * `t1 ∘ t2 ∘ t3` becomes `op1(t1, op2(t2, t3))`.
+ *
+ * Example:
+ * ```kotlin
+ * // Suppose '-' is parsed into a function that subtracts
+ * val subOp: Parsikle<(Int,Int)->Int> = parse('-').map { { a, b -> a - b } }
+ * val num: Parsikle<Int> = digit.many1().map { it.joinToString("").toInt() }
+ *
+ * val rightSub = num.chainRight(subOp)
+ * rightSub(ParserState("10-3-2"))
+ * // computes 10 - (3 - 2) = 9
+ * ```
+ *
+ * @receiver  parser for the operands
+ * @param op  parser that yields a function combining two `A`s
+ * @return    parser performing a right-associative fold of all parsed
+ *            operators and operands
+ */
+fun <A> Parsikle<A>.chainRight(op: Parsikle<(A, A) -> A>): Parsikle<A> =
+    this.then((op then this).many())
+        .map { (first, rest) ->
+            if (rest.isEmpty()) first
+            else {
+                val terms = listOf(first) + rest.map { it.second }
+                val ops   = rest.map { it.first }
+                terms.reduceRightIndexed { index, term, acc ->
+                    if (index == terms.lastIndex) term
+                    else ops[index](term, acc)
+                }
+            }
+        }
+
+/**
  * Sequences three parsers in order and collects their results into a `Triple`.
  *
  * Equivalent to `(p1 then p2 then p3)` with a mapping that unpacks the nested
@@ -804,3 +894,72 @@ fun <T> Parsikle<T>.withContext(name: String): Parsikle<T> = { state ->
  * @return        a parser that ignores leading whitespace then runs [parser]
  */
 fun <T> ignoreWhitespace(parser: Parsikle<T>) : Parsikle<T> = whiteSpace ignoreThen parser
+
+/**
+ * Makes this parser optional: if it succeeds, returns the parsed value; if it
+ * fails, backtracks and returns `null` without consuming input.
+ *
+ * Example:
+ * ```kotlin
+ * // Parser for a single digit, optional
+ * val digitOpt: Parsikle<Char?> = digit.optional()
+ *
+ * digitOpt(ParserState("7a"))  // Success('7')
+ * digitOpt(ParserState("x7"))  // Success(null)
+ * ```
+ *
+ * @receiver  the parser to make optional
+ * @return    a parser yielding the parsed `T` or `null` on failure
+ */
+fun <T> Parsikle<T>.optional(): Parsikle<T?> =
+    this.map { it as T? } or succeed(null)
+
+/**
+ * Captures the exact substring consumed by this parser.
+ *
+ * Runs this parser, and on success returns the substring from the original
+ * input corresponding to everything it consumed. On failure, propagates
+ * the original error and state.
+ *
+ * Example:
+ * ```kotlin
+ * val ident = number.slice()
+ *
+ * ident(ParserState("37abc"))
+ * // Success("37") // Number as a String
+ * ```
+ *
+ * @receiver  the parser whose consumed text to capture
+ * @return    a parser that yields the raw lexeme as String
+ */
+fun <T> Parsikle<T>.slice(): Parsikle<String> = { state ->
+    val start = state.index
+    when (val res = this(state)) {
+        is Success -> {
+            val end = res.state.index
+            Success(state.source.substring(start, end), res.state)
+        }
+        is Failure -> Failure(res.error, res.state)
+    }
+}
+
+/**
+ * Skips any surrounding whitespace before and after this parser.
+ *
+ * Useful when your grammar allows optional spaces around tokens, but you don’t
+ * want to sprinkle `whiteSpace` calls everywhere.
+ *
+ * Example:
+ * ```kotlin
+ * // Parses an integer with optional spaces around it, e.g. "  123  "
+ * val intTok: Parsikle<Int> = number.lexeme()
+ *
+ * val result = intTok(ParserState("   42   + next"))
+ * // Success(42), state.index points right after the trailing spaces
+ * ```
+ *
+ * @receiver  the parser for the core token
+ * @return    a parser that ignores whitespace both before and after
+ */
+fun <T> Parsikle<T>.lexeme(): Parsikle<T> =
+    whiteSpace ignoreThen this thenIgnore whiteSpace

@@ -40,12 +40,12 @@ class SuccessResultAssert<E: Error, R>(val result: Success<E, R>) {
         withRemainder("")
 
     fun withRemainder(remainder: String): SuccessResultAssert<E, R> {
-        assertEquals(result.state.remainder, remainder, "Expected remainder '$remainder', but was '${result.state.remainder}'")
+        assertEquals(remainder, result.state.remainder, "Expected remainder '$remainder', but was '${result.state.remainder}'")
         return this
     }
 
     fun withValue(value: R): SuccessResultAssert<E, R> {
-        assertEquals(result.value, value, "Expected value '$value', but was '${result.value}'")
+        assertEquals(value, result.value, "Expected value '$value', but was '${result.value}'")
         return this
     }
 
@@ -63,7 +63,7 @@ class SuccessResultAssert<E: Error, R>(val result: Success<E, R>) {
 
 class FailedResultAssert<E : Error, R>(val result: Failure<E, R>) {
     fun withError(error: E): FailedResultAssert<E, R> {
-        assertEquals(result.error, error)
+        assertEquals(error, result.error)
         return this
     }
 

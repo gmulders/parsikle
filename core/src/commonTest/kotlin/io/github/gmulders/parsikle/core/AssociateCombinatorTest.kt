@@ -15,6 +15,18 @@ class AssociateCombinatorTest {
     private val rightSub: Parsikle<Int> =
         rightAssociate(number, minusSign) { acc, _, term -> acc - term }
 
+    // Parser for '-' producing subtraction function
+    private val subOp: Parsikle<(Int, Int) -> Int> =
+        parse('-')
+            .map { _ ->
+                { a: Int, b: Int ->
+                    a - b
+                }
+            }
+
+    private val chainLeft = number.chainLeft(subOp)
+    private val chainRight = number.chainRight(subOp)
+
     @Test
     fun `leftAssociate subtracts left-to-right`() {
         assertThat(leftSub)
@@ -42,6 +54,42 @@ class AssociateCombinatorTest {
             .at(1, 3)
 
         assertThat(rightSub)
+            .whenParses("37")
+            .succeeds()
+            .withValue(37)
+            .at(1, 3)
+    }
+
+    @Test
+    fun `chainLeft subtracts left-to-right`() {
+        assertThat(chainLeft)
+            .whenParses("42-3-2")
+            .succeeds()
+            .withValue(37)
+            .at(1, 7)
+    }
+
+    @Test
+    fun `chainRight subtracts right-to-left`() {
+        assertThat(chainRight)
+            .whenParses("38-3-2")
+            .succeeds()
+            .withValue(37)
+            .at(1, 7)
+    }
+
+    @Test
+    fun `chainLeft with single term returns the term`() {
+        assertThat(chainLeft)
+            .whenParses("37")
+            .succeeds()
+            .withValue(37)
+            .at(1, 3)
+    }
+
+    @Test
+    fun `chainRight with single term returns the term`() {
+        assertThat(chainLeft)
             .whenParses("37")
             .succeeds()
             .withValue(37)

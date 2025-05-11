@@ -83,4 +83,25 @@ class ThenCombinatorTest {
             .at(1, 2)
             .withContext(Context(1, "\"b context\""))
     }
+
+    @Test
+    fun `between success returns correct sandwiched value and clears context`() {
+        val parser = between(b, a, b)
+        assertThat(parser)
+            .whenParses("bab")
+            .succeeds()
+            .withValue('a')
+            .at(1, 4)
+    }
+
+    @Test
+    fun `between failure preserves b context`() {
+        val parser = between(b, a, b)
+        assertThat(parser)
+            .whenParses("bac")
+            .fails<SimpleError>()
+            .withError(SimpleError("Expected 'b'"))
+            .at(1, 3)
+            .withContext(Context(2, "\"b context\""))
+    }
 }

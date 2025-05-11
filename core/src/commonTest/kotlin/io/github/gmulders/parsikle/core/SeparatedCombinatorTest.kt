@@ -3,7 +3,7 @@ package io.github.gmulders.parsikle.core
 import io.github.gmulders.parsikle.test.assertThat
 import kotlin.test.Test
 
-class SeparatedCombinatorsTest {
+class SeparatedCombinatorTest {
     private val comma: Parsikle<Char> = parse("Expected comma") { it == ',' }
 
     @Test
