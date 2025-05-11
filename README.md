@@ -14,7 +14,7 @@ Parsikle is available on Maven Central.
 ### Add to your Gradle project:
 
 ```kotlin
-implementation("io.github.gmulders.parsikle:core:0.0.3")
+implementation("io.github.gmulders.parsikle:core:0.0.4")
 ```
 If you’re using Kotlin Multiplatform (KMP), add it under the appropriate sourceSet:
 
@@ -23,7 +23,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation("io.github.gmulders.parsikle:core:0.0.3")
+                implementation("io.github.gmulders.parsikle:core:0.0.4")
             }
         }
     }
@@ -83,7 +83,7 @@ fun main() {
 ## 🧪 Testing Support
 There’s also a dedicated test module with helpers and matchers:
 ```kotlin
-implementation("io.github.gmulders.parsikle:parsikle-test:0.0.3")
+implementation("io.github.gmulders.parsikle:parsikle-test:0.0.4")
 ```
 
 ---

@@ -7,7 +7,7 @@ Parsikle is available on Maven Central and designed to work seamlessly in Kotlin
 ```kotlin
 // build.gradle.kts
 dependencies {
-    implementation("io.github.gmulders.parsikle:core:0.0.3")
+    implementation("io.github.gmulders.parsikle:core:0.0.4")
 }
 ```
 
@@ -18,12 +18,12 @@ kotlin {
   sourceSets {
     commonMain {
       dependencies {
-        implementation("io.github.gmulders.parsikle:core:0.0.3")
+        implementation("io.github.gmulders.parsikle:core:0.0.4")
       }
     }
     commonTest {
       dependencies {
-        implementation("io.github.gmulders.parsikle:parsikle-test:0.0.3")
+        implementation("io.github.gmulders.parsikle:parsikle-test:0.0.4")
       }
     }
   }
