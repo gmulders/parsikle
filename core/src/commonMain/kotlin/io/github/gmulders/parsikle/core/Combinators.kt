@@ -963,3 +963,29 @@ fun <T> Parsikle<T>.slice(): Parsikle<String> = { state ->
  */
 fun <T> Parsikle<T>.lexeme(): Parsikle<T> =
     whiteSpace ignoreThen this thenIgnore whiteSpace
+
+/**
+ * Wraps this parser's result in a [Spanned] that captures the source region
+ * consumed during parsing. The span runs from the input position before this
+ * parser runs to the position after it succeeds.
+ *
+ * Use this to attach location information to parsed values for later semantic
+ * analysis and error reporting.
+ *
+ * Example:
+ * ```kotlin
+ * val spannedNumber: Parsikle<Spanned<Int>> = number.spanned()
+ *
+ * val result = spannedNumber(ParserState("42 + 1"))
+ * // Success(Spanned(value=42, span=Span(start=0, end=2)), ...)
+ * ```
+ *
+ * @receiver  the parser to wrap
+ * @return    a parser that produces a [Spanned] value with [Span] metadata
+ */
+fun <T> Parsikle<T>.spanned(): Parsikle<Spanned<T>> = { state ->
+    val start = state.index
+    this(state).then { value, endState ->
+        Success(Spanned(value, Span(state.source, start, endState.index)), endState)
+    }
+}
