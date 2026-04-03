@@ -18,6 +18,7 @@ data class ParserState(
     val source: String,
     val index: Int = 0,
     val context: List<Context> = emptyList(),
+    val tracker: ParseTracker = ParseTracker(),
 ) {
     /**
      * The remainder of the input from [index] to end
@@ -49,7 +50,11 @@ data class ParserState(
      * @param add Number of characters to skip
      * @return A new [ParserState] with [index] increased by [add]
      */
-    fun next(add: Int): ParserState = copy(index = index + add)
+    fun next(add: Int): ParserState {
+        val newIndex = index + add
+        tracker.track(newIndex)
+        return copy(index = newIndex)
+    }
 
     /**
      * Advance the cursor by one character.

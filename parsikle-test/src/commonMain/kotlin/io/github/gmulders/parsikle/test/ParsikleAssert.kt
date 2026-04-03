@@ -10,15 +10,16 @@ fun <R> assertThat(parser: Parsikle<R>): ParsikleAssert<R> =
 
 class ParsikleAssert<R>(val parser: Parsikle<R>) {
     fun whenParses(s: String): ResultAssert<R> {
-        val result = parser(ParserState(s))
-        return ResultAssert(parser, result)
+        val state = ParserState(s)
+        val result = parser(state)
+        return ResultAssert(parser, result, state)
     }
 }
 
-class ResultAssert<R>(val parser: Parsikle<R>, val result: Result<Error, R>) {
+class ResultAssert<R>(val parser: Parsikle<R>, val result: Result<Error, R>, val initialState: ParserState) {
     fun succeeds(): SuccessResultAssert<Error, R> {
         return when(result) {
-            is Success -> SuccessResultAssert(result).withEmptyContext()
+            is Success -> SuccessResultAssert(result, initialState).withEmptyContext()
             is Failure -> fail("Result should be Success, but parse failed: ${(result as Failure<Error, R>).error.message}")
         }
     }
@@ -26,11 +27,11 @@ class ResultAssert<R>(val parser: Parsikle<R>, val result: Result<Error, R>) {
     inline fun <reified E : Error> fails(): FailedResultAssert<E, R> {
         assertTrue(result is Failure, "Expected result to be a failure")
         assertTrue(result.error is E, "Expected error to be ${E::class}, but was ${result.error::class}")
-        return FailedResultAssert(result as Failure<E, R>)
+        return FailedResultAssert(result as Failure<E, R>, initialState)
     }
 }
 
-class SuccessResultAssert<E: Error, R>(val result: Success<E, R>) {
+class SuccessResultAssert<E: Error, R>(val result: Success<E, R>, val initialState: ParserState) {
     fun withEmptyContext(): SuccessResultAssert<E, R> {
         assertTrue(result.state.context.isEmpty(), "Expected empty context, but was ${result.state.context}")
         return this
@@ -59,9 +60,14 @@ class SuccessResultAssert<E: Error, R>(val result: Success<E, R>) {
         assertEquals(column, result.state.column, "Expected column '$column', but was '${result.state.column}'")
         return this
     }
+
+    fun withFurthestIndex(index: Int): SuccessResultAssert<E, R> {
+        assertEquals(index, initialState.tracker.furthestIndex, "Expected furthest index '$index', but was '${initialState.tracker.furthestIndex}'")
+        return this
+    }
 }
 
-class FailedResultAssert<E : Error, R>(val result: Failure<E, R>) {
+class FailedResultAssert<E : Error, R>(val result: Failure<E, R>, val initialState: ParserState) {
     fun withError(error: E): FailedResultAssert<E, R> {
         assertEquals(error, result.error)
         return this
@@ -75,6 +81,11 @@ class FailedResultAssert<E : Error, R>(val result: Failure<E, R>) {
 
     fun withContext(vararg context: Context): FailedResultAssert<E, R> {
         assertEquals(context.toList(), result.state.context, "Expected context '$context', but was '${result.state.context}'")
+        return this
+    }
+
+    fun withFurthestIndex(index: Int): FailedResultAssert<E, R> {
+        assertEquals(index, initialState.tracker.furthestIndex, "Expected furthest index '$index', but was '${initialState.tracker.furthestIndex}'")
         return this
     }
 }
