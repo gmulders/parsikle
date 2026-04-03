@@ -11,5 +11,5 @@ subprojects {
 
 allprojects {
     group = "io.github.gmulders.parsikle"
-    version = "0.0.5"
+    version = "0.0.6"
 }
