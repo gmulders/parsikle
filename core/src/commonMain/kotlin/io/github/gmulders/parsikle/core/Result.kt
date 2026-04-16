@@ -88,7 +88,7 @@ sealed class Result<out X : Error, out V>(open val state: ParserState) {
     fun <T : Error> mapError(transform: (X) -> T): Result<T, V> =
         when (this) {
             is Success -> this as Success<T, V>
-            is Failure -> Failure(transform(error), state)
+            is Failure -> state.fail(transform(error))
         }
 
     /**
@@ -114,7 +114,7 @@ sealed class Result<out X : Error, out V>(open val state: ParserState) {
  * @property error The parse error
  * @property state The [ParserState] when the failure occurred
  */
-data class Failure<X : Error, T>(val error: X, override val state: ParserState) : Result<X, T>(state)
+data class Failure<X : Error, T> internal constructor(val error: X, override val state: ParserState) : Result<X, T>(state)
 
 /**
  * Indicates a parser success with a specific [value] and the [state] after consumption.

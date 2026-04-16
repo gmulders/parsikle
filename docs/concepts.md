@@ -19,13 +19,14 @@ This uniform model makes it easy to build, combine, and transform parsers using 
 
 ## ParserState
 
-`ParserState` tracks the input string, the current position within that string, and a stack of parse contexts:
+`ParserState` tracks the input string, the current position within that string, a stack of parse contexts, and a shared `ParseTracker`:
 
 ```kotlin
 data class ParserState(
   val source: String,
   val index: Int = 0,
-  val context: List<Context> = emptyList()
+  val context: List<Context> = emptyList(),
+  val tracker: ParseTracker = ParseTracker(),
 )
 ```
 
@@ -35,6 +36,9 @@ Key features:
 * **`line`** and **`column`**: Calculated based on newline breaks in the input, used for error reporting.
 * **`next()`** / **`next(n: Int)`**: Advance the state by one (or *n*) characters.
 * **`pushContext(name)`** / **`popContext()`**: Add or remove a named context frame for nested parsing scopes, improving error traces.
+* **`fail(error)`**: Produces a `Failure` at the current position; prefer this over constructing `Failure` directly so the `ParseTracker` stays in sync.
+
+The `tracker` is shared across all `ParserState` copies from a single parse run and records the furthest position reached along with the error at that position. When `or` / `oneOf` backtracks, the tracker still points to where the parser got deepest — which is usually what you want for error messages.
 
 ---
 
@@ -56,7 +60,7 @@ data class Failure<X : Error, T>(
 ) : Result<X, T>(state)
 ```
 
-When you apply a `Parsikle<R>` to a `ParserState`, you get back either a `Success` with the parsed value and updated state, or a `Failure` with an error and the failing state.
+When you apply a `Parsikle<R>` to a `ParserState`, you get back either a `Success` with the parsed value and updated state, or a `Failure` with an error and the failing state. Note that `Failure`'s constructor is `internal`; use `ParserState.fail(error)` to create failures.
 
 Key methods on `Result`:
 
@@ -65,6 +69,5 @@ Key methods on `Result`:
 * **`mapError(fn)`**: Apply `fn` to transform the error in case of failure.
 * **`thenError(transform)`**: If `Failure`, run `transform(error, state)` to recover or adjust the error.
 * **`popContext()`**: On `Success`, remove the latest context frame from the state; on `Failure`, leave state unchanged.
-* **`toEither()`**: Convert to an `Either<X, V>` (using Arrow) for interoperability.
 
 These primitives allow concise expression of parser logic, error handling, and context management without boilerplate. Happy parsing!

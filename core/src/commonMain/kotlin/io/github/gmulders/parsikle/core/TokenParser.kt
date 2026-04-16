@@ -55,7 +55,7 @@ fun <T> tokenParser(re: Regex, type: T): Parsikle<TokenMatch<T>> = { state ->
     val remainder = state.source.subSequence(state.index, state.source.length)
     val match = re.find(remainder)
     if (match == null) {
-        Failure(RegularExpressionError(re, remainder), state)
+        state.fail(RegularExpressionError(re, remainder))
     } else {
         Success(TokenMatch(type, match), state.next(match.range.last + 1))
     }

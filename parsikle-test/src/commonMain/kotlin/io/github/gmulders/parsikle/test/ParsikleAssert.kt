@@ -65,6 +65,11 @@ class SuccessResultAssert<E: Error, R>(val result: Success<E, R>, val initialSta
         assertEquals(index, initialState.tracker.furthestIndex, "Expected furthest index '$index', but was '${initialState.tracker.furthestIndex}'")
         return this
     }
+
+    fun withFurthestError(error: Error): SuccessResultAssert<E, R> {
+        assertEquals(error, initialState.tracker.furthestError, "Expected furthest error '$error', but was '${initialState.tracker.furthestError}'")
+        return this
+    }
 }
 
 class FailedResultAssert<E : Error, R>(val result: Failure<E, R>, val initialState: ParserState) {
@@ -86,6 +91,11 @@ class FailedResultAssert<E : Error, R>(val result: Failure<E, R>, val initialSta
 
     fun withFurthestIndex(index: Int): FailedResultAssert<E, R> {
         assertEquals(index, initialState.tracker.furthestIndex, "Expected furthest index '$index', but was '${initialState.tracker.furthestIndex}'")
+        return this
+    }
+
+    fun withFurthestError(error: Error): FailedResultAssert<E, R> {
+        assertEquals(error, initialState.tracker.furthestError, "Expected furthest error '$error', but was '${initialState.tracker.furthestError}'")
         return this
     }
 }

@@ -79,6 +79,20 @@ data class ParserState(
      * @return A new [ParserState] with the last context removed
      */
     fun popContext(): ParserState = copy(context = context.dropLast(1))
+
+    /**
+     * Creates a [Failure] and tracks it in the [ParseTracker] in one step.
+     *
+     * Use this instead of constructing [Failure] directly so that every failure
+     * is automatically recorded for furthest-failure reporting.
+     *
+     * @param error the parse error to report
+     * @return a [Failure] at the current position
+     */
+    fun <X : Error, T> fail(error: X): Failure<X, T> {
+        tracker.trackFailure(index, error)
+        return Failure(error, this)
+    }
 }
 
 /**

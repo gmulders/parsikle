@@ -178,7 +178,7 @@ fun <A> oneOf(p: Parsikle<A>, vararg parsers: Parsikle<A>): Parsikle<A> =
 infix fun <T, V> Parsikle<T>.map(fn: (T) -> V): Parsikle<V> = { state -> this(state).map(fn) }
 
 /**
- * Operator alias for [`map`], allowing you to write `parser { fn }` instead
+ * Operator alias for [map], allowing you to write `parser { fn }` instead
  * of `parser.map { fn }`.
  *
  * Example:
@@ -240,7 +240,7 @@ fun <A> succeed(a: A): Parsikle<A> = { state -> Success(a, state) }
  * @param error  the `Error` instance to return on parse invocation
  * @return       a parser that yields `Failure(error, state)` immediately
  */
-fun <A> fail(error: Error): Parsikle<A> = { state -> Failure(error, state) }
+fun <A> fail(error: Error): Parsikle<A> = { state -> state.fail(error) }
 
 /**
  * Always fails with a `SimpleError` constructed from the given [error] message,
@@ -254,7 +254,7 @@ fun <A> fail(error: Error): Parsikle<A> = { state -> Failure(error, state) }
  * ```
  *
  * @param error  the error message for the `SimpleError`
- * @return       a parser that yields `Failure(SimpleError(error), state)`
+ * @return       a parser that yields `state.fail(SimpleError(error))`
  *               immediately
  */
 fun <A> fail(error: String): Parsikle<A> = fail(SimpleError(error))
@@ -476,7 +476,7 @@ fun <A> Parsikle<A>.filter(message: String, predicate: (A) -> Boolean): Parsikle
         if (predicate(value)) {
             Success(value, remainder)
         } else {
-            Failure(SimpleError(message), remainder.copy(index = state.index))
+            remainder.copy(index = state.index).fail(SimpleError(message))
         }
     }
 }
@@ -939,7 +939,7 @@ fun <T> Parsikle<T>.slice(): Parsikle<String> = { state ->
             val end = res.state.index
             Success(state.source.substring(start, end), res.state)
         }
-        is Failure -> Failure(res.error, res.state)
+        is Failure -> res.state.fail(res.error)
     }
 }
 

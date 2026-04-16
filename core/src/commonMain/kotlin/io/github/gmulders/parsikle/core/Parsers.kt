@@ -79,6 +79,6 @@ val end: Parsikle<Unit> = { state ->
     if (state.isEof()) {
         Success(Unit, state)
     } else {
-        Failure(SimpleError("Could not match end"), state)
+        state.fail(SimpleError("Could not match end"))
     }
 }

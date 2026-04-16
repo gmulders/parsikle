@@ -7,8 +7,17 @@ package io.github.gmulders.parsikle.core
 class ParseTracker {
     var furthestIndex: Int = 0
         private set
+    var furthestError: Error? = null
+        private set
 
     fun track(index: Int) {
         if (index > furthestIndex) furthestIndex = index
+    }
+
+    fun trackFailure(index: Int, error: Error) {
+        if (index >= furthestIndex) {
+            furthestIndex = index
+            furthestError = error
+        }
     }
 }

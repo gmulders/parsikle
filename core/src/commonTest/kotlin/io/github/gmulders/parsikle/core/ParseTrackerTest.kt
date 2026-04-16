@@ -3,6 +3,7 @@ package io.github.gmulders.parsikle.core
 import io.github.gmulders.parsikle.test.assertThat
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNull
 
 class ParseTrackerTest {
 
@@ -26,6 +27,7 @@ class ParseTrackerTest {
             .whenParses("abcZ")
             .fails<OrError>()
             .withFurthestIndex(3)
+            .withFurthestError(SimpleError("Expected 'd'"))
     }
 
     @Test
@@ -37,6 +39,27 @@ class ParseTrackerTest {
             .whenParses("abcdZ")
             .fails<OrError>()
             .withFurthestIndex(4)
+            .withFurthestError(SimpleError("Expected 'e'"))
+    }
+
+    @Test
+    fun `tracker records error at furthest failure position`() {
+        // 'a' succeeds, then 'X' fails at index 1
+        assertThat(a thenIgnore parse('X'))
+            .whenParses("aZ")
+            .fails<SimpleError>()
+            .withFurthestIndex(1)
+            .withFurthestError(SimpleError("Expected 'X'"))
+    }
+
+    @Test
+    fun `later failure at same position overwrites earlier one`() {
+        // Both alternatives fail at index 0; the OrError from mapError is the last tracked
+        assertThat(parse('X') or parse('Y'))
+            .whenParses("Z")
+            .fails<OrError>()
+            .withFurthestIndex(0)
+            .withFurthestError(OrError(SimpleError("Expected 'X'"), SimpleError("Expected 'Y'")))
     }
 
     @Test
@@ -48,8 +71,9 @@ class ParseTrackerTest {
     }
 
     @Test
-    fun `tracker starts at zero`() {
+    fun `tracker starts at zero with no error`() {
         val state = ParserState("abc")
         assertEquals(0, state.tracker.furthestIndex)
+        assertNull(state.tracker.furthestError)
     }
 }

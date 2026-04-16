@@ -30,7 +30,7 @@ fun parse(failure: String, predicate: (Char) -> Boolean): Parsikle<Char> = { sta
     if (state.isNotEof() && predicate(state.nextChar())) {
         Success(state.nextChar(), state.next())
     } else {
-        Failure(SimpleError(failure), state)
+        state.fail(SimpleError(failure))
     }
 }
 
